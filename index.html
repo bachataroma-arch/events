@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Bachata Roma - Eventi</title>
+
   <link rel="icon" type="image/png" href="./logoBR.png" />
 
   <style>
@@ -42,21 +43,19 @@
       opacity: 0.95;
     }
 
+    /* FILTERS */
     .filters {
       display: flex;
       justify-content: center;
       gap: 14px;
       flex-wrap: wrap;
       margin-top: 22px;
-
       padding: 14px 18px;
       border-radius: 16px;
-
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.12);
       backdrop-filter: blur(12px);
-
-      max-width: 850px;
+      max-width: 900px;
       margin-left: auto;
       margin-right: auto;
     }
@@ -65,7 +64,7 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      min-width: 180px;
+      min-width: 200px;
     }
 
     .filter-label {
@@ -94,69 +93,36 @@
       padding: 20px;
     }
 
-    /* ===== CARD PREMIUM ===== */
+    /* CARD PREMIUM + HOVER EFFECT */
     .card {
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 18px;
       overflow: hidden;
       backdrop-filter: blur(14px);
-
       display: flex;
       flex-direction: column;
       min-height: 520px;
       position: relative;
 
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
       cursor: pointer;
-
-      transform: translateY(0);
-      transition: all 0.35s ease;
-      will-change: transform;
     }
 
-    /* 🌟 HOVER PREMIUM */
     .card:hover {
-      transform: translateY(-14px) scale(1.015);
-      box-shadow:
-        0 30px 70px rgba(0,0,0,0.55),
-        0 0 0 1px rgba(255,255,255,0.18) inset;
-      border: 1px solid rgba(255,255,255,0.25);
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.35);
     }
 
-    /* ✨ SHIMMER EFFECT */
-    .card::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        120deg,
-        transparent 0%,
-        rgba(255,255,255,0.08) 50%,
-        transparent 100%
-      );
-      transform: translateX(-100%);
-      transition: transform 0.6s ease;
-      pointer-events: none;
-    }
-
-    .card:hover::before {
-      transform: translateX(100%);
-    }
-
-    /* IMAGE */
     .card img {
       width: 100%;
       height: 250px;
       object-fit: cover;
-
-      transform: scale(1.02);
-      transition: transform 0.6s ease, filter 0.4s ease;
-      filter: saturate(1.05) contrast(1.05);
+      transition: transform 0.4s ease;
     }
 
     .card:hover img {
-      transform: scale(1.10);
-      filter: saturate(1.2) contrast(1.1);
+      transform: scale(1.08);
     }
 
     /* BADGE */
@@ -164,16 +130,12 @@
       position: absolute;
       top: 12px;
       left: 12px;
-
-      background: rgba(255,255,255,0.92);
+      background: #fffaf6;
       color: #b4334c;
-
       font-size: 12px;
-      font-weight: 900;
-
+      font-weight: 800;
       padding: 6px 10px;
-      border-radius: 10px;
-
+      border-radius: 8px;
       z-index: 2;
     }
 
@@ -186,14 +148,14 @@
 
     .title {
       font-size: 18px;
-      font-weight: 800;
+      font-weight: 700;
       margin-bottom: 10px;
     }
 
     .info {
       font-size: 13.5px;
       margin-bottom: 7px;
-      opacity: 0.85;
+      opacity: 0.9;
     }
 
     .btn {
@@ -202,16 +164,13 @@
       background: linear-gradient(135deg, #fffaf6, #f2e6e6);
       color: #b4334c;
       text-align: center;
-      font-weight: 900;
+      font-weight: 800;
       border-radius: 12px;
       text-decoration: none;
-
-      transition: all 0.25s ease;
     }
 
     .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 28px rgba(0,0,0,0.25);
+      filter: brightness(1.05);
     }
 
   </style>
@@ -227,6 +186,7 @@
 
 </header>
 
+<!-- FILTERS -->
 <div class="filters">
 
   <div class="filter-group">
@@ -256,25 +216,31 @@
 
 <script>
 
-const BASE = "https://corsproxy.io/?";
-const API =
-  "https://www.goandance.com/api/affiliates/6b69b3cc-49a3-445e-b6cb-8121d472c0c7/events";
+const BASE = "https://api.codetabs.com/v1/proxy?quest=";
+const API = "https://www.goandance.com/api/affiliates/6b69b3cc-49a3-445e-b6cb-8121d472c0c7/events";
 
 let eventsData = [];
 
-const countryNames =
-  new Intl.DisplayNames(['it'], { type: 'region' });
+const countryNames = new Intl.DisplayNames(['it'], { type: 'region' });
 
 const continentMap = {
   "Europa": new Set(["IT","ES","FR","DE","NL","PT","BE","CH","AT","GR","PL","RO","HU","CZ","SE","NO","DK","FI","IE","BG","HR","RS","UA","TR"]),
-  "America": new Set(["US","CA","MX","BR","AR","CO","CL","PE","VE","DO","CR","PA","UY","EC"]),
-  "Asia": new Set(["JP","CN","KR","TH","VN","ID","IN","PH","MY","SG","SA","AE","IL"]),
+  "America": new Set(["US","CA","MX","BR","AR","CO","CL","PE","VE","DO","CR","PA","UY","EC","GT","HN"]),
+  "Asia": new Set(["JP","CN","KR","TH","VN","ID","IN","PH","MY","SG","SA","AE","IL","PK","BD"]),
   "Africa": new Set(["ZA","EG","MA","TN","DZ","NG","KE","GH","ET","UG","TZ"]),
   "Oceania": new Set(["AU","NZ"])
 };
 
+function getContinent(code) {
+  for (const [k,v] of Object.entries(continentMap)) {
+    if (v.has(code)) return k;
+  }
+  return "Europa";
+}
+
+/* FETCH */
 async function fetchAll(url, acc = []) {
-  const res = await fetch(BASE + url);
+  const res = await fetch(BASE + encodeURIComponent(url));
   const json = await res.json();
 
   acc.push(...(json.data || []));
@@ -286,90 +252,117 @@ async function fetchAll(url, acc = []) {
   return acc;
 }
 
-function getContinent(code) {
-  for (const [c, set] of Object.entries(continentMap)) {
-    if (set.has(code)) return c;
+/* POPULATE CONTINENTS */
+function populateContinents(events) {
+  const sel = document.getElementById("continentFilter");
+  sel.innerHTML = `<option value="all">Ovunque</option>`;
+
+  const used = [...new Set(events.map(e => e.address?.country?.code))].filter(Boolean);
+  const conts = [...new Set(used.map(getContinent))];
+
+  conts.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    sel.appendChild(opt);
+  });
+}
+
+/* POPULATE COUNTRIES */
+function populateCountries(continent, events) {
+  const sel = document.getElementById("countryFilter");
+  sel.innerHTML = `<option value="all">Tutti i paesi</option>`;
+
+  let list = [...new Set(events.map(e => e.address?.country?.code))].filter(Boolean);
+
+  if (continent !== "all") {
+    list = list.filter(c => getContinent(c) === continent);
   }
-  return "Europa";
+
+  list.sort((a,b)=>
+    (countryNames.of(a)||a).localeCompare(countryNames.of(b)||b,"it",{sensitivity:"base"})
+  );
+
+  list.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = countryNames.of(c) || c;
+    sel.appendChild(opt);
+  });
 }
 
-function getDays(e) {
-  return Math.round((new Date(e.dateTo) - new Date(e.dateFrom)) / 86400000) + 1;
+/* MONTHS */
+function populateMonths() {
+  const sel = document.getElementById("monthFilter");
+  const now = new Date();
+
+  for (let i=0;i<12;i++) {
+    const d = new Date(now.getFullYear(), now.getMonth()+i,1);
+
+    const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+
+    const opt = document.createElement("option");
+    opt.value = val;
+    opt.textContent = d.toLocaleDateString("it-IT",{month:"long",year:"numeric"});
+
+    sel.appendChild(opt);
+  }
 }
 
+/* BADGE */
 function getBadge(e) {
-  const days = getDays(e);
+  const days = Math.round((new Date(e.dateTo)-new Date(e.dateFrom))/86400000)+1;
 
-  if (days === 1) return `📅 1 giorno`;
-  if (days <= 3) return `⚡ Weekend`;
+  if (days === 1) return "📅 1 giorno";
+  if (days <= 3) return "⚡ Weekend";
   if (days <= 5) return `🎉 ${days} giorni`;
   return `💎 ${days} giorni evento`;
 }
 
+/* FILTER */
 function filterEvents(events) {
-
   const continent = document.getElementById("continentFilter").value;
   const country = document.getElementById("countryFilter").value;
   const month = document.getElementById("monthFilter").value;
 
   return events.filter(e => {
-
     const d = new Date(e.dateFrom);
     const code = e.address?.country?.code;
 
-    if (continent !== "all" && getContinent(code) !== continent) return false;
-    if (country !== "all" && code !== country) return false;
+    if (continent !== "all" && getContinent(code)!==continent) return false;
+    if (country !== "all" && code!==country) return false;
 
     if (month !== "all") {
       const m = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
-      if (m !== month) return false;
+      if (m!==month) return false;
     }
 
     return true;
   });
 }
 
+/* RENDER */
 function render(events) {
-
   const c = document.getElementById("events");
   c.innerHTML = "";
 
-  if (!events.length) {
-    c.innerHTML = `<div style="text-align:center;padding:40px;">Nessun evento trovato</div>`;
-    return;
-  }
-
   events.forEach(e => {
-
     const url = e.url?.it || e.url?.en;
-
-    const start = new Date(e.dateFrom).toLocaleDateString("it-IT");
-    const end = new Date(e.dateTo).toLocaleDateString("it-IT");
-
-    const location =
-      [e.address?.name, e.address?.locality].filter(Boolean).join(" - ");
 
     const card = document.createElement("div");
     card.className = "card";
 
     card.innerHTML = `
       <div class="badge">${getBadge(e)}</div>
-
       <a href="${url}" target="_blank">
-        <img src="${e.image?.previewUrl || ''}" />
+        <img src="${e.image?.previewUrl||""}">
       </a>
-
       <div class="content">
-
-        <div class="title">${e.name?.it || "Evento"}</div>
-
-        <div class="info">📍 ${location}</div>
-        <div class="info">📅 ${start} → ${end}</div>
-
-        <a class="btn" href="${url}" target="_blank">
-          Scopri evento
-        </a>
-
+        <div class="title">${e.name?.it||e.name?.en||"Evento"}</div>
+        <div class="info">📍 ${e.address?.locality||""}</div>
+        <div class="info">📅 ${new Date(e.dateFrom).toLocaleDateString("it-IT")}</div>
+        <div class="info">👤 ${e.organizer||""}</div>
+        <a class="btn" href="${url}" target="_blank">Scopri evento</a>
       </div>
     `;
 
@@ -377,19 +370,24 @@ function render(events) {
   });
 }
 
+/* INIT */
 async function init() {
   eventsData = await fetchAll(API);
+
+  populateContinents(eventsData);
+  populateCountries("all", eventsData);
+  populateMonths();
+
   render(eventsData);
 }
 
-document.getElementById("continentFilter").onchange = () =>
+document.getElementById("continentFilter").onchange = (e)=>{
+  populateCountries(e.target.value, eventsData);
   render(filterEvents(eventsData));
+};
 
-document.getElementById("countryFilter").onchange = () =>
-  render(filterEvents(eventsData));
-
-document.getElementById("monthFilter").onchange = () =>
-  render(filterEvents(eventsData));
+document.getElementById("countryFilter").onchange = ()=>render(filterEvents(eventsData));
+document.getElementById("monthFilter").onchange = ()=>render(filterEvents(eventsData));
 
 init();
 
