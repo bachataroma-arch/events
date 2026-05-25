@@ -35,7 +35,6 @@
     h1 {
       margin: 0;
       font-size: 34px;
-      letter-spacing: 1px;
     }
 
     .subtitle {
@@ -59,9 +58,7 @@
       background: #fffaf6;
       color: #b4334c;
       font-weight: bold;
-      font-size: 14px;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
     .container {
@@ -73,15 +70,9 @@
 
     .card {
       background: rgba(0,0,0,0.25);
-      backdrop-filter: blur(10px);
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-      transition: transform 0.2s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
+      backdrop-filter: blur(10px);
     }
 
     .card img {
@@ -116,11 +107,9 @@
       text-decoration: none;
       font-weight: bold;
       border-radius: 10px;
-      font-size: 15px;
     }
 
-    .loader,
-    .empty {
+    .loader, .empty {
       text-align: center;
       padding: 40px;
       font-size: 18px;
@@ -133,7 +122,7 @@
 
 <header>
 
-  <img class="logo" src="./logoBR.png" alt="Bachata Roma Logo" />
+  <img class="logo" src="./logoBR.png" />
 
   <h1>Bachata Roma</h1>
 
@@ -162,14 +151,16 @@
 
 <script>
 
-const BASE_URL = "https://corsproxy.io/?";
+// 🔥 PROXY RAPIDO (fix CORS)
+const BASE_URL =
+  "https://api.codetabs.com/v1/proxy?quest=";
 
 const FIRST_API =
   "https://www.goandance.com/api/affiliates/6b69b3cc-49a3-445e-b6cb-8121d472c0c7/events";
 
 let globalEvents = [];
 
-// FETCH PAGINATO
+// 🔥 FETCH PAGINATO
 async function fetchAllEvents(url, collected = []) {
 
   const finalUrl = BASE_URL + encodeURIComponent(url);
@@ -189,11 +180,10 @@ async function fetchAllEvents(url, collected = []) {
   return collected;
 }
 
-// MONTH FILTER
+// 🔥 MESI DINAMICI (12 mesi)
 function populateMonths() {
 
   const select = document.getElementById("dateFilter");
-
   const now = new Date();
 
   for (let i = 0; i < 12; i++) {
@@ -216,7 +206,7 @@ function populateMonths() {
   }
 }
 
-// COUNTRIES
+// 🔥 COUNTRY
 function populateCountries(events) {
 
   const select = document.getElementById("countryFilter");
@@ -235,7 +225,7 @@ function populateCountries(events) {
   });
 }
 
-// FILTER
+// 🔥 FILTER
 function filterEvents(events, dateFilter, countryFilter) {
 
   const now = new Date();
@@ -243,7 +233,6 @@ function filterEvents(events, dateFilter, countryFilter) {
   return events.filter(e => {
 
     const date = new Date(e.dateFrom);
-
     const country = e.address?.country?.caption || "Unknown";
 
     if (countryFilter !== "all" && country !== countryFilter) {
@@ -270,7 +259,7 @@ function filterEvents(events, dateFilter, countryFilter) {
   });
 }
 
-// RENDER
+// 🔥 RENDER
 function render(events) {
 
   const container = document.getElementById("events");
@@ -295,8 +284,7 @@ function render(events) {
     card.className = "card";
 
     card.innerHTML = `
-      
-      <!-- IMMAGINE CLICCABILE -->
+
       <a href="${url}" target="_blank">
         <img src="${e.image?.previewUrl || ''}" />
       </a>
@@ -308,9 +296,7 @@ function render(events) {
         </div>
 
         <div class="info">📅 ${date}</div>
-
         <div class="info">📍 ${e.address?.locality || ''}</div>
-
         <div class="info">🌍 ${country}</div>
 
         <a class="btn" href="${url}" target="_blank">
@@ -328,7 +314,7 @@ function render(events) {
   }
 }
 
-// APPLY FILTERS
+// 🔥 APPLY
 function applyFilters() {
 
   const dateFilter = document.getElementById("dateFilter").value;
@@ -339,7 +325,7 @@ function applyFilters() {
   render(filtered);
 }
 
-// LOAD
+// 🔥 LOAD
 async function loadEvents() {
 
   try {
