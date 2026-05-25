@@ -29,11 +29,7 @@
       filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
     }
 
-    h1 {
-      margin: 0;
-      font-size: 34px;
-      letter-spacing: 1px;
-    }
+    h1 { margin: 0; font-size: 34px; }
 
     .subtitle {
       margin-top: 6px;
@@ -41,8 +37,11 @@
       opacity: 0.95;
     }
 
-    .filter {
-      text-align: center;
+    .filters {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
       margin-top: 15px;
     }
 
@@ -65,12 +64,6 @@
       backdrop-filter: blur(10px);
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-      transition: transform 0.2s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
     }
 
     .card img {
@@ -79,21 +72,11 @@
       object-fit: cover;
     }
 
-    .content {
-      padding: 16px;
-    }
+    .content { padding: 16px; }
 
-    .title {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
+    .title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
 
-    .info {
-      font-size: 15px;
-      margin-bottom: 6px;
-      opacity: 0.95;
-    }
+    .info { font-size: 15px; margin-bottom: 6px; opacity: 0.95; }
 
     .btn {
       display: inline-block;
@@ -104,7 +87,6 @@
       text-decoration: none;
       font-weight: bold;
       border-radius: 10px;
-      font-size: 15px;
     }
 
     .loader {
@@ -120,16 +102,28 @@
   <img class="logo" src="logoBR.png" alt="Bachata Roma Logo" />
 
   <h1>Bachata Roma</h1>
-  <div class="subtitle">🔥 Prossimi eventi affiliati Go&Dance</div>
+  <div class="subtitle">🔥 Eventi affiliati Go&Dance</div>
 
-  <!-- FILTRO -->
-  <div class="filter">
-    <select id="dateFilter">
-      <option value="all">Tutti gli eventi</option>
-      <option value="week">Questa settimana</option>
-      <option value="month">Questo mese</option>
-      <option value="future">Da oggi in poi</option>
+  <!-- FILTRI -->
+  <div class="filters">
+
+    <!-- COUNTRY -->
+    <select id="countryFilter">
+      <option value="all">🌍 Tutti i Paesi</option>
     </select>
+
+    <!-- PERIODO -->
+    <select id="dateFilter">
+      <option value="all">📅 Tutti gli eventi</option>
+      <option value="week">Questa settimana</option>
+
+      <option value="2026-06">Giugno 2026</option>
+      <option value="2026-07">Luglio 2026</option>
+      <option value="2026-08">Agosto 2026</option>
+      <option value="2026-09">Settembre 2026</option>
+      <option value="2026-10">Ottobre 2026</option>
+    </select>
+
   </div>
 </header>
 
@@ -143,87 +137,114 @@ const API_URL =
   "https://api.allorigins.win/raw?url=" +
   encodeURIComponent("https://www.goandance.com/api/affiliates/6b69b3cc-49a3-445e-b6cb-8121d472c0c7/events");
 
-function filterEvents(events, filterType) {
+let globalEvents = [];
+
+function filterEvents(events, dateFilter, countryFilter) {
   const now = new Date();
 
   return events.filter(e => {
     const date = new Date(e.dateFrom);
 
-    if (filterType === "future") {
-      return date >= now;
+    const country = e.address?.country || "Unknown";
+
+    // COUNTRY FILTER
+    if (countryFilter !== "all" && country !== countryFilter) {
+      return false;
     }
 
-    if (filterType === "week") {
+    // DATE FILTER
+    if (dateFilter === "all") return true;
+
+    if (dateFilter === "week") {
       const end = new Date();
       end.setDate(now.getDate() + 7);
       return date >= now && date <= end;
     }
 
-    if (filterType === "month") {
-      const end = new Date();
-      end.setMonth(now.getMonth() + 1);
-      return date >= now && date <= end;
+    if (dateFilter.includes("-")) {
+      const [year, month] = dateFilter.split("-");
+      return (
+        date.getFullYear() === parseInt(year) &&
+        (date.getMonth() + 1) === parseInt(month)
+      );
     }
 
     return true;
   });
 }
 
-async function loadEvents() {
-  try {
-    const res = await fetch(API_URL);
-    const json = await res.json();
+function render(events) {
+  const container = document.getElementById("events");
+  container.innerHTML = "";
 
-    const allEvents = json.data.sort(
-      (a, b) => new Date(a.dateFrom) - new Date(b.dateFrom)
-    );
+  events.forEach(event => {
 
-    const filterType = document.getElementById("dateFilter").value;
-    const events = filterEvents(allEvents, filterType);
-
-    const container = document.getElementById("events");
-    container.innerHTML = "";
-
-    events.forEach(event => {
-
-      const date = new Date(event.dateFrom).toLocaleDateString("it-IT", {
-        weekday: "short",
-        day: "2-digit",
-        month: "long"
-      });
-
-      const card = document.createElement("div");
-      card.className = "card";
-
-      card.innerHTML = `
-        <img src="${event.image?.previewUrl || ''}" />
-        <div class="content">
-          <div class="title">${event.name?.it || event.name?.en}</div>
-          <div class="info">📅 ${date}</div>
-          <div class="info">📍 ${event.address?.locality || ''}</div>
-
-          <a class="btn" href="${event.url?.it || event.url?.en}" target="_blank">
-            Prenota con sconto BR 
-          </a>
-        </div>
-      `;
-
-      container.appendChild(card);
+    const date = new Date(event.dateFrom).toLocaleDateString("it-IT", {
+      weekday: "short",
+      day: "2-digit",
+      month: "long"
     });
 
-    if (events.length === 0) {
-      container.innerHTML = "<p style='text-align:center'>Nessun evento disponibile</p>";
-    }
+    const card = document.createElement("div");
+    card.className = "card";
 
-  } catch (err) {
-    document.getElementById("events").innerHTML =
-      "<p style='text-align:center'>Errore nel caricamento eventi</p>";
-    console.error(err);
+    card.innerHTML = `
+      <img src="${event.image?.previewUrl || ''}" />
+      <div class="content">
+        <div class="title">${event.name?.it || event.name?.en}</div>
+        <div class="info">📅 ${date}</div>
+        <div class="info">📍 ${event.address?.locality || ''}</div>
+        <div class="info">🌍 ${event.address?.country || 'Unknown'}</div>
+
+        <a class="btn" href="${event.url?.it || event.url?.en}" target="_blank">
+          Prenota con sconto BR
+        </a>
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+
+  if (events.length === 0) {
+    container.innerHTML = "<p style='text-align:center'>Nessun evento disponibile</p>";
   }
 }
 
-// reload al cambio filtro
-document.getElementById("dateFilter").addEventListener("change", loadEvents);
+async function loadEvents() {
+  const res = await fetch(API_URL);
+  const json = await res.json();
+
+  globalEvents = json.data.sort(
+    (a, b) => new Date(a.dateFrom) - new Date(b.dateFrom)
+  );
+
+  populateCountries(globalEvents);
+  applyFilters();
+}
+
+function populateCountries(events) {
+  const select = document.getElementById("countryFilter");
+
+  const countries = [...new Set(events.map(e => e.address?.country || "Unknown"))];
+
+  countries.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    select.appendChild(opt);
+  });
+}
+
+function applyFilters() {
+  const dateFilter = document.getElementById("dateFilter").value;
+  const countryFilter = document.getElementById("countryFilter").value;
+
+  const filtered = filterEvents(globalEvents, dateFilter, countryFilter);
+  render(filtered);
+}
+
+document.getElementById("dateFilter").addEventListener("change", applyFilters);
+document.getElementById("countryFilter").addEventListener("change", applyFilters);
 
 loadEvents();
 
