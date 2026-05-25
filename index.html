@@ -5,15 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Bachata Roma - Eventi</title>
 
-   <link rel="icon" type="image/png" href="logoBR.png" />
-
+  <link rel="icon" type="image/png" href="logoBR.png" />
 
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: #b4334c;
-      color: #fffaf6; /* 🔥 nuovo colore testo */
+      color: #fffaf6;
     }
 
     header {
@@ -34,14 +33,24 @@
       margin: 0;
       font-size: 34px;
       letter-spacing: 1px;
-      color: #fffaf6;
     }
 
     .subtitle {
       margin-top: 6px;
       font-size: 16px;
       opacity: 0.95;
-      color: #fffaf6;
+    }
+
+    .filter {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    select {
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
     }
 
     .container {
@@ -58,7 +67,6 @@
       overflow: hidden;
       box-shadow: 0 10px 25px rgba(0,0,0,0.25);
       transition: transform 0.2s ease;
-      color: #fffaf6; /* 🔥 testo card */
     }
 
     .card:hover {
@@ -79,15 +87,12 @@
       font-size: 20px;
       font-weight: bold;
       margin-bottom: 10px;
-      line-height: 1.3;
-      color: #fffaf6;
     }
 
     .info {
       font-size: 15px;
       margin-bottom: 6px;
       opacity: 0.95;
-      color: #fffaf6;
     }
 
     .btn {
@@ -102,15 +107,9 @@
       font-size: 15px;
     }
 
-    .btn:hover {
-      opacity: 0.9;
-    }
-
     .loader {
       text-align: center;
       padding: 40px;
-      font-size: 16px;
-      color: #fffaf6;
     }
   </style>
 </head>
@@ -118,12 +117,20 @@
 <body>
 
 <header>
-
   <img class="logo" src="logoBR.png" alt="Bachata Roma Logo" />
-
 
   <h1>Bachata Roma</h1>
   <div class="subtitle">🔥 Prossimi eventi affiliati Go&Dance</div>
+
+  <!-- FILTRO -->
+  <div class="filter">
+    <select id="dateFilter">
+      <option value="all">Tutti gli eventi</option>
+      <option value="week">Questa settimana</option>
+      <option value="month">Questo mese</option>
+      <option value="future">Da oggi in poi</option>
+    </select>
+  </div>
 </header>
 
 <div id="events" class="container">
@@ -131,22 +138,48 @@
 </div>
 
 <script>
+
 const API_URL =
   "https://api.allorigins.win/raw?url=" +
   encodeURIComponent("https://www.goandance.com/api/affiliates/6b69b3cc-49a3-445e-b6cb-8121d472c0c7/events");
-//const API_URL = "https://www.goandance.com/api/affiliates/6b69b3cc-49a3-445e-b6cb-8121d472c0c7/events";
-//const API_URL = "/.netlify/functions/events";
+
+function filterEvents(events, filterType) {
+  const now = new Date();
+
+  return events.filter(e => {
+    const date = new Date(e.dateFrom);
+
+    if (filterType === "future") {
+      return date >= now;
+    }
+
+    if (filterType === "week") {
+      const end = new Date();
+      end.setDate(now.getDate() + 7);
+      return date >= now && date <= end;
+    }
+
+    if (filterType === "month") {
+      const end = new Date();
+      end.setMonth(now.getMonth() + 1);
+      return date >= now && date <= end;
+    }
+
+    return true;
+  });
+}
 
 async function loadEvents() {
   try {
     const res = await fetch(API_URL);
     const json = await res.json();
 
-    const today = new Date();
+    const allEvents = json.data.sort(
+      (a, b) => new Date(a.dateFrom) - new Date(b.dateFrom)
+    );
 
-    const events = json.data
-      .filter(e => new Date(e.dateFrom) >= today)
-      .sort((a, b) => new Date(a.dateFrom) - new Date(b.dateFrom));
+    const filterType = document.getElementById("dateFilter").value;
+    const events = filterEvents(allEvents, filterType);
 
     const container = document.getElementById("events");
     container.innerHTML = "";
@@ -189,7 +222,11 @@ async function loadEvents() {
   }
 }
 
+// reload al cambio filtro
+document.getElementById("dateFilter").addEventListener("change", loadEvents);
+
 loadEvents();
+
 </script>
 
 </body>
