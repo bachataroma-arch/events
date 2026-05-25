@@ -77,6 +77,7 @@
 
       display: flex;
       flex-direction: column;
+
       min-height: 430px;
     }
 
@@ -173,13 +174,18 @@ const FIRST_API =
 
 let globalEvents = [];
 
-// 🌍 GLOBAL COUNTRY FORMATTER (NO MAPPE MANUALI)
-const countryNames = new Intl.DisplayNames(['it'], { type: 'region' });
+const countryNames =
+  new Intl.DisplayNames(['it'], {
+    type: 'region'
+  });
 
 // FETCH ALL EVENTS
 async function fetchAllEvents(url, collected = []) {
 
-  const res = await fetch(BASE_URL + encodeURIComponent(url));
+  const res = await fetch(
+    BASE_URL + encodeURIComponent(url)
+  );
+
   if (!res.ok) throw new Error("API error");
 
   const json = await res.json();
@@ -196,46 +202,76 @@ async function fetchAllEvents(url, collected = []) {
 // MONTHS
 function populateMonths() {
 
-  const select = document.getElementById("dateFilter");
+  const select =
+    document.getElementById("dateFilter");
+
   const now = new Date();
 
   for (let i = 0; i < 12; i++) {
 
-    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    const d = new Date(
+      now.getFullYear(),
+      now.getMonth() + i,
+      1
+    );
 
-    const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const value =
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 
-    const label = d.toLocaleDateString("it-IT", {
-      month: "long",
-      year: "numeric"
-    });
+    const label =
+      d.toLocaleDateString("it-IT", {
+        month: "long",
+        year: "numeric"
+      });
 
-    const opt = document.createElement("option");
+    const opt =
+      document.createElement("option");
+
     opt.value = value;
-    opt.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+
+    opt.textContent =
+      label.charAt(0).toUpperCase() +
+      label.slice(1);
 
     select.appendChild(opt);
   }
 }
 
-// COUNTRIES (UNIFICATI VIA ISO CODE)
+// COUNTRIES SORTED ALPHABETICALLY
 function populateCountries(events) {
 
-  const select = document.getElementById("countryFilter");
+  const select =
+    document.getElementById("countryFilter");
 
-  select.innerHTML = `<option value="all">🌍 Tutti i Paesi</option>`;
+  select.innerHTML =
+    `<option value="all">🌍 Tutti i Paesi</option>`;
 
   const countries = [
     ...new Set(
-      events.map(e => e.address?.country?.code)
+      events.map(
+        e => e.address?.country?.code
+      )
     )
-  ].filter(Boolean).sort();
+  ]
+  .filter(Boolean)
+  .sort((a, b) =>
+    (countryNames.of(a) || a)
+      .localeCompare(
+        countryNames.of(b) || b,
+        "it",
+        { sensitivity: "base" }
+      )
+  );
 
   countries.forEach(code => {
 
-    const opt = document.createElement("option");
+    const opt =
+      document.createElement("option");
+
     opt.value = code;
-    opt.textContent = countryNames.of(code) || code;
+
+    opt.textContent =
+      countryNames.of(code) || code;
 
     select.appendChild(opt);
   });
@@ -249,6 +285,7 @@ function filterEvents(events, dateFilter, countryFilter) {
   return events.filter(e => {
 
     const date = new Date(e.dateFrom);
+
     const code = e.address?.country?.code;
 
     if (countryFilter !== "all" && code !== countryFilter) {
@@ -278,7 +315,9 @@ function filterEvents(events, dateFilter, countryFilter) {
 // RENDER
 function render(events) {
 
-  const container = document.getElementById("events");
+  const container =
+    document.getElementById("events");
+
   container.innerHTML = "";
 
   events.forEach(e => {
@@ -292,9 +331,13 @@ function render(events) {
       year: "numeric"
     });
 
-    const country = countryNames.of(e.address?.country?.code) || "Unknown";
+    const country =
+      countryNames.of(
+        e.address?.country?.code
+      ) || "Unknown";
 
-    const card = document.createElement("div");
+    const card =
+      document.createElement("div");
 
     card.className = "card";
 
@@ -324,17 +367,26 @@ function render(events) {
   });
 
   if (!events.length) {
-    container.innerHTML = `<div class="empty">Nessun evento trovato</div>`;
+    container.innerHTML =
+      `<div class="empty">Nessun evento trovato</div>`;
   }
 }
 
-// APPLY
+// APPLY FILTERS
 function applyFilters() {
 
-  const dateFilter = document.getElementById("dateFilter").value;
-  const countryFilter = document.getElementById("countryFilter").value;
+  const dateFilter =
+    document.getElementById("dateFilter").value;
 
-  const filtered = filterEvents(globalEvents, dateFilter, countryFilter);
+  const countryFilter =
+    document.getElementById("countryFilter").value;
+
+  const filtered =
+    filterEvents(
+      globalEvents,
+      dateFilter,
+      countryFilter
+    );
 
   render(filtered);
 }
@@ -344,10 +396,13 @@ async function loadEvents() {
 
   try {
 
-    globalEvents = await fetchAllEvents(FIRST_API);
+    globalEvents =
+      await fetchAllEvents(FIRST_API);
 
-    globalEvents.sort((a,b) =>
-      new Date(a.dateFrom) - new Date(b.dateFrom)
+    globalEvents.sort(
+      (a, b) =>
+        new Date(a.dateFrom) -
+        new Date(b.dateFrom)
     );
 
     populateCountries(globalEvents);
@@ -363,8 +418,11 @@ async function loadEvents() {
 }
 
 // LISTENERS
-document.getElementById("countryFilter").addEventListener("change", applyFilters);
-document.getElementById("dateFilter").addEventListener("change", applyFilters);
+document.getElementById("countryFilter")
+  .addEventListener("change", applyFilters);
+
+document.getElementById("dateFilter")
+  .addEventListener("change", applyFilters);
 
 loadEvents();
 
