@@ -133,36 +133,74 @@
 
 <script>
 
-const API_URL =
-  "https://api.allorigins.win/raw?url=" +
-  encodeURIComponent("https://www.goandance.com/api/affiliates/6b69b3cc-49a3-445e-b6cb-8121d472c0c7/events");
+const BASE_URL =
+  "https://api.allorigins.win/raw?url=";
+
+const FIRST_API =
+  "https://www.goandance.com/api/affiliates/6b69b3cc-49a3-445e-b6cb-8121d472c0c7/events";
 
 let globalEvents = [];
 
+// FETCH PAGINATO (TUTTI GLI EVENTI)
+async function fetchAllEvents(url, collected = []) {
+
+  const finalUrl = BASE_URL + encodeURIComponent(url);
+
+  const res = await fetch(finalUrl);
+  const json = await res.json();
+
+  const newEvents = json.data || [];
+
+  collected.push(...newEvents);
+
+  // PAGINAZIONE
+  if (json.meta?.nextUrl) {
+    return fetchAllEvents(json.meta.nextUrl, collected);
+  }
+
+  return collected;
+}
+
+// FILTRI
 function filterEvents(events, dateFilter, countryFilter) {
+
   const now = new Date();
 
-  return events.filter(e => {
-    const date = new Date(e.dateFrom);
+  return events.filter(event => {
 
-    const country = e.address?.country || "Unknown";
+    const date = new Date(event.dateFrom);
 
-    // COUNTRY FILTER
-    if (countryFilter !== "all" && country !== countryFilter) {
+    // COUNTRY
+    const country =
+      event.address?.country?.caption || "Unknown";
+
+    if (
+      countryFilter !== "all" &&
+      country !== countryFilter
+    ) {
       return false;
     }
 
     // DATE FILTER
-    if (dateFilter === "all") return true;
+    if (dateFilter === "all") {
+      return true;
+    }
 
+    // SETTIMANA
     if (dateFilter === "week") {
+
       const end = new Date();
       end.setDate(now.getDate() + 7);
+
       return date >= now && date <= end;
     }
 
+    // YYYY-MM
     if (dateFilter.includes("-")) {
-      const [year, month] = dateFilter.split("-");
+
+      const [year, month] =
+        dateFilter.split("-");
+
       return (
         date.getFullYear() === parseInt(year) &&
         (date.getMonth() + 1) === parseInt(month)
@@ -173,32 +211,62 @@ function filterEvents(events, dateFilter, countryFilter) {
   });
 }
 
+// RENDER EVENTI
 function render(events) {
-  const container = document.getElementById("events");
+
+  const container =
+    document.getElementById("events");
+
   container.innerHTML = "";
 
   events.forEach(event => {
 
-    const date = new Date(event.dateFrom).toLocaleDateString("it-IT", {
+    const date = new Date(
+      event.dateFrom
+    ).toLocaleDateString("it-IT", {
       weekday: "short",
       day: "2-digit",
-      month: "long"
+      month: "long",
+      year: "numeric"
     });
 
-    const card = document.createElement("div");
+    const country =
+      event.address?.country?.caption || "Unknown";
+
+    const card =
+      document.createElement("div");
+
     card.className = "card";
 
     card.innerHTML = `
       <img src="${event.image?.previewUrl || ''}" />
-      <div class="content">
-        <div class="title">${event.name?.it || event.name?.en}</div>
-        <div class="info">📅 ${date}</div>
-        <div class="info">📍 ${event.address?.locality || ''}</div>
-        <div class="info">🌍 ${event.address?.country || 'Unknown'}</div>
 
-        <a class="btn" href="${event.url?.it || event.url?.en}" target="_blank">
+      <div class="content">
+
+        <div class="title">
+          ${event.name?.it || event.name?.en}
+        </div>
+
+        <div class="info">
+          📅 ${date}
+        </div>
+
+        <div class="info">
+          📍 ${event.address?.locality || ''}
+        </div>
+
+        <div class="info">
+          🌍 ${country}
+        </div>
+
+        <a
+          class="btn"
+          href="${event.url?.it || event.url?.en}"
+          target="_blank"
+        >
           Prenota con sconto BR
         </a>
+
       </div>
     `;
 
@@ -206,46 +274,103 @@ function render(events) {
   });
 
   if (events.length === 0) {
-    container.innerHTML = "<p style='text-align:center'>Nessun evento disponibile</p>";
+
+    container.innerHTML =
+      "<p style='text-align:center'>Nessun evento disponibile</p>";
   }
 }
 
-async function loadEvents() {
-  const res = await fetch(API_URL);
-  const json = await res.json();
-
-  globalEvents = json.data.sort(
-    (a, b) => new Date(a.dateFrom) - new Date(b.dateFrom)
-  );
-
-  populateCountries(globalEvents);
-  applyFilters();
-}
-
+// POPOLA COUNTRY DINAMICAMENTE
 function populateCountries(events) {
-  const select = document.getElementById("countryFilter");
 
-  const countries = [...new Set(events.map(e => e.address?.country || "Unknown"))];
+  const select =
+    document.getElementById("countryFilter");
 
-  countries.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
-    select.appendChild(opt);
+  select.innerHTML =
+    `<option value="all">🌍 Tutti i Paesi</option>`;
+
+  const countries = [
+    ...new Set(
+      events.map(
+        e =>
+          e.address?.country?.caption ||
+          "Unknown"
+      )
+    )
+  ].sort();
+
+  countries.forEach(country => {
+
+    const option =
+      document.createElement("option");
+
+    option.value = country;
+    option.textContent = country;
+
+    select.appendChild(option);
   });
 }
 
+// FILTRI UI
 function applyFilters() {
-  const dateFilter = document.getElementById("dateFilter").value;
-  const countryFilter = document.getElementById("countryFilter").value;
 
-  const filtered = filterEvents(globalEvents, dateFilter, countryFilter);
+  const dateFilter =
+    document.getElementById("dateFilter").value;
+
+  const countryFilter =
+    document.getElementById("countryFilter").value;
+
+  const filtered =
+    filterEvents(
+      globalEvents,
+      dateFilter,
+      countryFilter
+    );
+
   render(filtered);
 }
 
-document.getElementById("dateFilter").addEventListener("change", applyFilters);
-document.getElementById("countryFilter").addEventListener("change", applyFilters);
+// LOAD
+async function loadEvents() {
 
+  try {
+
+    document.getElementById("events").innerHTML =
+      "<div class='loader'>Caricamento eventi...</div>";
+
+    globalEvents =
+      await fetchAllEvents(FIRST_API);
+
+    // SORT
+    globalEvents.sort(
+      (a, b) =>
+        new Date(a.dateFrom) -
+        new Date(b.dateFrom)
+    );
+
+    populateCountries(globalEvents);
+
+    applyFilters();
+
+  } catch(err) {
+
+    console.error(err);
+
+    document.getElementById("events").innerHTML =
+      "<p style='text-align:center'>Errore caricamento eventi</p>";
+  }
+}
+
+// EVENT LISTENERS
+document
+  .getElementById("dateFilter")
+  .addEventListener("change", applyFilters);
+
+document
+  .getElementById("countryFilter")
+  .addEventListener("change", applyFilters);
+
+// START
 loadEvents();
 
 </script>
