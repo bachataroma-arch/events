@@ -57,15 +57,11 @@
       gap: 14px;
       flex-wrap: wrap;
       margin-top: 22px;
-
       padding: 14px 18px;
       border-radius: 16px;
-
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.12);
-
       backdrop-filter: blur(12px);
-
       max-width: 950px;
       margin-left: auto;
       margin-right: auto;
@@ -104,36 +100,29 @@
       padding: 18px;
     }
 
-    /* CARD (più compatta) */
+    /* CARD */
     .card {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 20px;
+      border-radius: 18px;
       overflow: hidden;
       backdrop-filter: blur(14px);
-
       display: flex;
       flex-direction: column;
-
-     
-      position: relative;
-
-      transition: transform .25s ease, box-shadow .25s ease;
+      transition: transform .2s ease, box-shadow .2s ease;
     }
 
     .card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+      transform: translateY(-6px);
+      box-shadow: 0 22px 45px rgba(0,0,0,0.28);
     }
 
-    /* IMAGE */
     .card img {
       width: 100%;
-      height: 190px;
+      height: 170px;
       object-fit: cover;
     }
 
-    /* BADGE */
     .badge {
       position: absolute;
       top: 10px;
@@ -146,7 +135,6 @@
       border-radius: 8px;
     }
 
-    /* CONTENT */
     .content {
       padding: 12px;
       display: flex;
@@ -167,7 +155,6 @@
       opacity: 0.9;
     }
 
-    /* BUTTON (NO CUORI) */
     .btn {
       margin-top: auto;
       padding: 11px;
@@ -179,15 +166,12 @@
       text-decoration: none;
     }
 
-    /* EMPTY */
     .empty {
       text-align: center;
       padding: 50px;
       font-size: 18px;
       opacity: 0.9;
     }
-
-
 
   </style>
 </head>
@@ -200,7 +184,6 @@
   <div class="subtitle">I migliori eventi del mondo 🔥</div>
 </header>
 
-<!-- FILTERS -->
 <div class="filters">
 
   <div class="filter-group">
@@ -228,9 +211,6 @@
 
 <div id="events" class="container"></div>
 
-
-
-
 <script>
 
 const BASE = "https://api.codetabs.com/v1/proxy?quest=";
@@ -249,7 +229,6 @@ const continentMap = {
   "Oceania": new Set(["AU","NZ"])
 };
 
-/* FETCH */
 async function fetchAll(url, acc = []) {
   const res = await fetch(BASE + encodeURIComponent(url));
   const json = await res.json();
@@ -258,7 +237,6 @@ async function fetchAll(url, acc = []) {
   return acc;
 }
 
-/* CONTINENT */
 function getContinent(code) {
   for (const [c,set] of Object.entries(continentMap)) {
     if (set.has(code)) return c;
@@ -266,7 +244,67 @@ function getContinent(code) {
   return "Europa";
 }
 
-/* BADGE (ORIGINALE) */
+/* CONTINENTI ORDINATI (EUROPA PRIMA) */
+function populateContinents(events) {
+  const sel = document.getElementById("continentFilter");
+
+  const used = [...new Set(events.map(e => e.address?.country?.code))].filter(Boolean);
+  let continents = [...new Set(used.map(getContinent))];
+
+  continents = continents.sort((a,b) => {
+    if (a === "Europa") return -1;
+    if (b === "Europa") return 1;
+    return a.localeCompare(b, "it", { sensitivity:"base" });
+  });
+
+  continents.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    sel.appendChild(opt);
+  });
+}
+
+/* PAESI ORDINATI */
+function populateCountries(continent, events) {
+  const sel = document.getElementById("countryFilter");
+
+  sel.innerHTML = `<option value="all">Tutti i paesi</option>`;
+
+  let list = [...new Set(events.map(e => e.address?.country?.code))].filter(Boolean);
+
+  if (continent !== "all") {
+    list = list.filter(c => getContinent(c) === continent);
+  }
+
+  list.sort((a,b) =>
+    (countryNames.of(a)||a).localeCompare(countryNames.of(b)||b,"it",{sensitivity:"base"})
+  );
+
+  list.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = countryNames.of(c) || c;
+    sel.appendChild(opt);
+  });
+}
+
+/* MONTHS */
+function populateMonths() {
+  const sel = document.getElementById("monthFilter");
+  const now = new Date();
+
+  for (let i=0;i<12;i++) {
+    const d = new Date(now.getFullYear(), now.getMonth()+i, 1);
+    const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+
+    const opt = document.createElement("option");
+    opt.value = val;
+    opt.textContent = d.toLocaleDateString("it-IT",{month:"long",year:"numeric"});
+    sel.appendChild(opt);
+  }
+}
+
 function getBadge(e) {
   const days =
     Math.round((new Date(e.dateTo) - new Date(e.dateFrom)) / 86400000) + 1;
@@ -277,7 +315,6 @@ function getBadge(e) {
   return `💎 ${days} giorni evento`;
 }
 
-/* FILTER */
 function filterEvents(events) {
   const continent = continentFilter.value;
   const country = countryFilter.value;
@@ -299,61 +336,6 @@ function filterEvents(events) {
   });
 }
 
-/* POPULATE CONTINENTS */
-function populateContinents(events) {
-  const sel = document.getElementById("continentFilter");
-
-  const used = [...new Set(events.map(e => e.address?.country?.code))].filter(Boolean);
-  const continents = [...new Set(used.map(getContinent))];
-
-  continents.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
-    sel.appendChild(opt);
-  });
-}
-
-/* POPULATE COUNTRIES */
-function populateCountries(continent, events) {
-  const sel = document.getElementById("countryFilter");
-
-  sel.innerHTML = `<option value="all">Tutti i paesi</option>`;
-
-  let list = [...new Set(events.map(e => e.address?.country?.code))].filter(Boolean);
-
-  if (continent !== "all") {
-    list = list.filter(c => getContinent(c) === continent);
-  }
-
-  list.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = countryNames.of(c) || c;
-    sel.appendChild(opt);
-  });
-}
-
-/* POPULATE MONTHS */
-function populateMonths() {
-  const sel = document.getElementById("monthFilter");
-
-  const now = new Date();
-
-  for (let i=0;i<12;i++) {
-    const d = new Date(now.getFullYear(), now.getMonth()+i, 1);
-
-    const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
-
-    const opt = document.createElement("option");
-    opt.value = val;
-    opt.textContent = d.toLocaleDateString("it-IT", { month:"long", year:"numeric" });
-
-    sel.appendChild(opt);
-  }
-}
-
-/* RENDER */
 function render(events) {
   const c = document.getElementById("events");
   c.innerHTML = "";
@@ -364,9 +346,7 @@ function render(events) {
   }
 
   events.forEach(e => {
-
     const url = e.url?.it || e.url?.en;
-
     const start = new Date(e.dateFrom).toLocaleDateString("it-IT");
     const end = new Date(e.dateTo).toLocaleDateString("it-IT");
 
@@ -375,21 +355,13 @@ function render(events) {
 
     card.innerHTML = `
       <div class="badge">${getBadge(e)}</div>
-
       <img src="${e.image?.previewUrl || ''}" />
-
       <div class="content">
-
         <div class="title">${e.name?.it || e.name?.en || "Evento"}</div>
-
         <div class="info">📍 ${e.address?.locality || ""}</div>
-
         <div class="info">📅 ${start} → ${end}</div>
-
         <div class="info">👤 ${e.organizer || ""}</div>
-
         <a class="btn" href="${url}" target="_blank">Scopri evento</a>
-
       </div>
     `;
 
@@ -397,9 +369,7 @@ function render(events) {
   });
 }
 
-/* INIT FIXED */
 async function init() {
-
   eventsData = await fetchAll(API);
 
   populateContinents(eventsData);
@@ -409,7 +379,6 @@ async function init() {
   render(eventsData);
 }
 
-/* EVENTS */
 continentFilter.onchange = (e) => {
   populateCountries(e.target.value, eventsData);
   render(filterEvents(eventsData));
