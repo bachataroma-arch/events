@@ -2,9 +2,22 @@
 <html lang="it">
 
 <head>
+
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https:; connect-src https://www.goandance.com; frame-ancestors 'none'">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0" />
+
+  <!-- ✅ FIX CSP -->
+  <meta http-equiv="Content-Security-Policy"
+        content="
+default-src 'self' https:;
+script-src 'self' 'unsafe-inline';
+style-src 'self' 'unsafe-inline';
+img-src 'self' https: data:;
+connect-src 'self' https:;
+font-src 'self' https: data:;
+">
 
   <title>Bachata Roma - Eventi</title>
 
@@ -122,6 +135,7 @@
     /* 🔥 PREMIUM HOVER */
     .card:hover {
       transform: translateY(-10px) scale(1.02);
+
       box-shadow:
         0 30px 60px rgba(0,0,0,0.35),
         0 0 20px rgba(255,255,255,0.08);
@@ -215,18 +229,21 @@
     }
 
   </style>
+
 </head>
 
 <body>
 
 <header>
 
-  <img class="logo" src="./logoBR.png" alt="Bachata Roma Logo" />
+  <img class="logo"
+       src="./logoBR.png"
+       alt="Bachata Roma Logo" />
 
   <h1>Bachata Roma</h1>
 
   <div class="subtitle">
-    I migliori eventi del mondo a portata di click 🔥 
+    I migliori eventi del mondo a portata di click 🔥
   </div>
 
 </header>
@@ -264,298 +281,361 @@
 
 <script>
 
-const API = "https://www.goandance.com/api/affiliates/6b69b3cc-49a3-445e-b6cb-8121d472c0c7/events";
+const BASE =
+  "https://api.codetabs.com/v1/proxy?quest=";
+
+const API =
+  "https://www.goandance.com/api/affiliates/6b69b3cc-49a3-445e-b6cb-8121d472c0c7/events";
 
 let eventsData = [];
 
-const countryNames = new Intl.DisplayNames(['it'], { type: 'region' });
+const countryNames =
+  new Intl.DisplayNames(['it'], { type: 'region' });
 
 const continentMap = {
+
   "Europa": new Set([
     "IT","ES","FR","DE","NL","PT","BE","CH","AT","GR",
     "PL","RO","HU","CZ","SE","NO","DK","FI","IE",
     "BG","HR","RS","UA","TR"
   ]),
+
   "America": new Set([
     "US","CA","MX","BR","AR","CO","CL","PE","VE",
     "DO","CR","PA","UY","EC","GT","HN"
   ]),
+
   "Asia": new Set([
     "JP","CN","KR","TH","VN","ID","IN","PH","MY",
     "SG","SA","AE","IL","PK","BD"
   ]),
+
   "Africa": new Set([
     "ZA","EG","MA","TN","DZ","NG","KE","GH","ET","UG","TZ"
   ]),
+
   "Oceania": new Set([
     "AU","NZ"
   ])
 };
 
 function getContinent(code) {
+
   for (const [k,v] of Object.entries(continentMap)) {
     if (v.has(code)) return k;
   }
+
   return "Europa";
-}
-
-// SECURE: Sanifica URL per evitare XSS
-function sanitizeUrl(url) {
-  if (!url) return "#";
-  try {
-    const parsed = new URL(url);
-    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
-      return url;
-    }
-  } catch {
-    return "#";
-  }
-  return "#";
-}
-
-// SECURE: Sanifica testo per evitare HTML injection
-function sanitizeText(text) {
-  if (!text) return "";
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
 }
 
 /* FETCH */
 async function fetchAll(url, acc = []) {
+
   try {
-    const res = await fetch(url);
-    
-    if (!res.ok) {
-      throw new Error(`API Error: ${res.status}`);
-    }
-    
-    const json = await res.json();
-    
-    if (json.data && Array.isArray(json.data)) {
-      acc.push(...json.data);
-    }
-    
+
+    const res =
+      await fetch(BASE + encodeURIComponent(url));
+
+    const json =
+      await res.json();
+
+    acc.push(...(json.data || []));
+
     if (json.meta?.nextUrl) {
       return fetchAll(json.meta.nextUrl, acc);
     }
-    
+
     return acc;
-  } catch (error) {
-    console.error("Fetch error:", error);
+
+  } catch (err) {
+
+    console.error(err);
     showError();
-    return acc;
+
+    return [];
   }
 }
 
 /* CONTINENTS */
 function populateContinents(events) {
-  const sel = document.getElementById("continentFilter");
-  
-  sel.innerHTML = '<option value="all">Ovunque</option>';
-  
-  const used = [...new Set(events.map(e => e.address?.country?.code))].filter(Boolean);
-  const conts = [...new Set(used.map(getContinent))];
-  
+
+  const sel =
+    document.getElementById("continentFilter");
+
+  sel.innerHTML =
+    `<option value="all">Ovunque</option>`;
+
+  const used =
+    [...new Set(events.map(e => e.address?.country?.code))]
+      .filter(Boolean);
+
+  const conts =
+    [...new Set(used.map(getContinent))];
+
   conts.forEach(c => {
-    const opt = document.createElement("option");
+
+    const opt =
+      document.createElement("option");
+
     opt.value = c;
     opt.textContent = c;
+
     sel.appendChild(opt);
   });
 }
 
 /* COUNTRIES */
 function populateCountries(continent, events) {
-  const sel = document.getElementById("countryFilter");
-  
-  sel.innerHTML = '<option value="all">Tutti i paesi</option>';
-  
-  let list = [...new Set(events.map(e => e.address?.country?.code))].filter(Boolean);
-  
+
+  const sel =
+    document.getElementById("countryFilter");
+
+  sel.innerHTML =
+    `<option value="all">Tutti i paesi</option>`;
+
+  let list =
+    [...new Set(events.map(e => e.address?.country?.code))]
+      .filter(Boolean);
+
   if (continent !== "all") {
-    list = list.filter(c => getContinent(c) === continent);
+    list =
+      list.filter(c => getContinent(c) === continent);
   }
-  
-  list.sort((a,b) =>
+
+  list.sort((a,b)=>
     (countryNames.of(a)||a).localeCompare(
       countryNames.of(b)||b,
       "it",
       { sensitivity:"base" }
     )
   );
-  
+
   list.forEach(c => {
-    const opt = document.createElement("option");
+
+    const opt =
+      document.createElement("option");
+
     opt.value = c;
-    opt.textContent = countryNames.of(c) || c;
+
+    opt.textContent =
+      countryNames.of(c) || c;
+
     sel.appendChild(opt);
   });
 }
 
 /* MONTHS */
 function populateMonths() {
-  const sel = document.getElementById("monthFilter");
-  const now = new Date();
-  
+
+  const sel =
+    document.getElementById("monthFilter");
+
+  const now =
+    new Date();
+
   for (let i=0; i<12; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth()+i, 1);
-    const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
-    
-    const opt = document.createElement("option");
+
+    const d =
+      new Date(now.getFullYear(), now.getMonth()+i, 1);
+
+    const val =
+      `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+
+    const opt =
+      document.createElement("option");
+
     opt.value = val;
-    opt.textContent = d.toLocaleDateString("it-IT", {
-      month:"long",
-      year:"numeric"
-    });
-    
+
+    opt.textContent =
+      d.toLocaleDateString("it-IT", {
+        month:"long",
+        year:"numeric"
+      });
+
     sel.appendChild(opt);
   }
 }
 
 /* BADGE */
 function getBadge(e) {
-  const days = Math.round((new Date(e.dateTo)-new Date(e.dateFrom))/86400000) + 1;
-  
+
+  const days =
+    Math.round(
+      (new Date(e.dateTo)-new Date(e.dateFrom))
+      / 86400000
+    ) + 1;
+
   if (days === 1) return "📅 1 giorno";
+
   if (days <= 3) return "⚡ Weekend";
+
   if (days <= 5) return `🎉 ${days} giorni`;
+
   return `💎 ${days} giorni evento`;
 }
 
 /* FILTER */
 function filterEvents(events) {
-  const continent = document.getElementById("continentFilter").value;
-  const country = document.getElementById("countryFilter").value;
-  const month = document.getElementById("monthFilter").value;
-  
+
+  const continent =
+    document.getElementById("continentFilter").value;
+
+  const country =
+    document.getElementById("countryFilter").value;
+
+  const month =
+    document.getElementById("monthFilter").value;
+
   return events.filter(e => {
-    const d = new Date(e.dateFrom);
-    const code = e.address?.country?.code;
-    
-    if (continent !== "all" && getContinent(code) !== continent) return false;
-    if (country !== "all" && code !== country) return false;
-    
+
+    const d =
+      new Date(e.dateFrom);
+
+    const code =
+      e.address?.country?.code;
+
+    if (
+      continent !== "all" &&
+      getContinent(code)!==continent
+    ) return false;
+
+    if (
+      country !== "all" &&
+      code!==country
+    ) return false;
+
     if (month !== "all") {
-      const m = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
-      if (m !== month) return false;
+
+      const m =
+        `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+
+      if (m!==month) return false;
     }
-    
+
     return true;
   });
 }
 
-/* RENDER - SECURE: Usa createElement instead of innerHTML */
+/* RENDER */
 function render(events) {
-  const container = document.getElementById("events");
-  container.innerHTML = "";
-  
+
+  const c =
+    document.getElementById("events");
+
+  c.innerHTML = "";
+
   events.forEach(e => {
-    const url = sanitizeUrl(e.url?.it || e.url?.en);
-    const start = new Date(e.dateFrom).toLocaleDateString("it-IT");
-    const end = new Date(e.dateTo).toLocaleDateString("it-IT");
-    
-    const card = document.createElement("div");
+
+    const url =
+      e.url?.it || e.url?.en;
+
+    const start =
+      new Date(e.dateFrom)
+        .toLocaleDateString("it-IT");
+
+    const end =
+      new Date(e.dateTo)
+        .toLocaleDateString("it-IT");
+
+    const card =
+      document.createElement("div");
+
     card.className = "card";
-    
-    // Badge
-    const badge = document.createElement("div");
-    badge.className = "badge";
-    badge.textContent = getBadge(e);
-    card.appendChild(badge);
-    
-    // Image link
-    const imgLink = document.createElement("a");
-    imgLink.href = url;
-    imgLink.target = "_blank";
-    imgLink.rel = "noopener noreferrer";
-    
-    const img = document.createElement("img");
-    img.src = sanitizeUrl(e.image?.previewUrl) || "";
-    img.alt = sanitizeText(e.name?.it || e.name?.en || "Evento");
-    imgLink.appendChild(img);
-    card.appendChild(imgLink);
-    
-    // Content
-    const content = document.createElement("div");
-    content.className = "content";
-    
-    // Title
-    const title = document.createElement("div");
-    title.className = "title";
-    title.textContent = e.name?.it || e.name?.en || "Evento";
-    content.appendChild(title);
-    
-    // Location
-    const location = document.createElement("div");
-    location.className = "info";
-    location.textContent = "📍 " + (e.address?.locality || "");
-    content.appendChild(location);
-    
-    // Dates
-    const dates = document.createElement("div");
-    dates.className = "info";
-    dates.textContent = `📅 ${start} → ${end}`;
-    content.appendChild(dates);
-    
-    // Organizer
-    const organizer = document.createElement("div");
-    organizer.className = "info";
-    organizer.textContent = "👤 " + (e.organizer || "");
-    content.appendChild(organizer);
-    
-    // Button
-    const btn = document.createElement("a");
-    btn.className = "btn";
-    btn.href = url;
-    btn.target = "_blank";
-    btn.rel = "noopener noreferrer";
-    btn.textContent = "Scopri evento";
-    content.appendChild(btn);
-    
-    card.appendChild(content);
-    container.appendChild(card);
+
+    card.innerHTML = `
+
+      <div class="badge">
+        ${getBadge(e)}
+      </div>
+
+      <a href="${url}" target="_blank" rel="noopener noreferrer">
+        <img src="${e.image?.previewUrl||""}">
+      </a>
+
+      <div class="content">
+
+        <div class="title">
+          ${e.name?.it||e.name?.en||"Evento"}
+        </div>
+
+        <div class="info">
+          📍 ${e.address?.locality||""}
+        </div>
+
+        <div class="info">
+          📅 ${start} → ${end}
+        </div>
+
+        <div class="info">
+          👤 ${e.organizer||""}
+        </div>
+
+        <a class="btn"
+           href="${url}"
+           target="_blank"
+           rel="noopener noreferrer">
+
+          Scopri evento
+
+        </a>
+
+      </div>
+    `;
+
+    c.appendChild(card);
   });
 }
 
-/* ERROR HANDLING */
+/* ERROR */
 function showError() {
-  const container = document.getElementById("events");
-  container.innerHTML = '<div class="error-message">⚠️ Impossibile caricare gli eventi. Riprova più tardi.</div>';
+
+  document.getElementById("events").innerHTML = `
+
+    <div class="error-message">
+      ⚠️ Impossibile caricare gli eventi.
+    </div>
+
+  `;
 }
 
 /* INIT */
 async function init() {
-  try {
-    eventsData = await fetchAll(API);
-    
-    if (eventsData.length === 0) {
-      showError();
-      return;
-    }
-    
-    populateContinents(eventsData);
-    populateCountries("all", eventsData);
-    populateMonths();
-    
-    render(eventsData);
-  } catch (error) {
-    console.error("Init error:", error);
-    showError();
+
+  eventsData =
+    await fetchAll(API);
+
+  if (!eventsData.length) {
+    return;
   }
+
+  populateContinents(eventsData);
+  populateCountries("all", eventsData);
+  populateMonths();
+
+  render(eventsData);
 }
 
-document.getElementById("continentFilter").addEventListener("change", (e) => {
-  populateCountries(e.target.value, eventsData);
-  render(filterEvents(eventsData));
+document
+  .getElementById("continentFilter")
+  .addEventListener("change", (e)=>{
+
+    populateCountries(e.target.value, eventsData);
+
+    render(filterEvents(eventsData));
 });
 
-document.getElementById("countryFilter").addEventListener("change", () => {
-  render(filterEvents(eventsData));
+document
+  .getElementById("countryFilter")
+  .addEventListener("change", ()=>{
+
+    render(filterEvents(eventsData));
 });
 
-document.getElementById("monthFilter").addEventListener("change", () => {
-  render(filterEvents(eventsData));
+document
+  .getElementById("monthFilter")
+  .addEventListener("change", ()=>{
+
+    render(filterEvents(eventsData));
 });
 
 init();
