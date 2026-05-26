@@ -9,7 +9,6 @@
 
   <link rel="icon" type="image/png" href="./logoBR.png" />
 
-  <!-- CSP FIX -->
   <meta http-equiv="Content-Security-Policy"
     content="
       default-src 'self' https: data: blob:;
@@ -26,6 +25,7 @@
       font-family: Arial, sans-serif;
       background: #b4334c;
       color: #fffaf6;
+      padding-bottom: 80px;
     }
 
     header {
@@ -42,10 +42,7 @@
       filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
     }
 
-    h1 {
-      margin: 0;
-      font-size: 34px;
-    }
+    h1 { margin: 0; font-size: 34px; }
 
     .subtitle {
       margin-top: 6px;
@@ -54,7 +51,6 @@
     }
 
     /* FILTERS */
-
     .filters {
       display: flex;
       justify-content: center;
@@ -71,7 +67,6 @@
       backdrop-filter: blur(12px);
 
       max-width: 950px;
-
       margin-left: auto;
       margin-right: auto;
     }
@@ -92,180 +87,128 @@
     select {
       width: 100%;
       padding: 12px 14px;
-
       border-radius: 12px;
       border: none;
-
       background: #fffaf6;
       color: #b4334c;
-
       font-weight: 700;
       cursor: pointer;
-
-      transition: 0.2s ease;
-    }
-
-    select:hover {
-      transform: translateY(-1px);
     }
 
     /* GRID */
-
     .container {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 320px));
       justify-content: center;
-      gap: 20px;
-      padding: 24px;
+      gap: 18px;
+      padding: 18px;
     }
 
-    /* CARD */
-
+    /* CARD (più compatta) */
     .card {
       background: rgba(255,255,255,0.08);
-
       border: 1px solid rgba(255,255,255,0.12);
-
       border-radius: 20px;
-
       overflow: hidden;
-
       backdrop-filter: blur(14px);
 
       display: flex;
       flex-direction: column;
 
-      min-height: 520px;
-
+      min-height: 430px;
       position: relative;
 
-      transition:
-        transform .25s ease,
-        box-shadow .25s ease,
-        border-color .25s ease;
+      transition: transform .25s ease, box-shadow .25s ease;
     }
 
     .card:hover {
-
-      transform:
-        translateY(-10px)
-        scale(1.02);
-
-      box-shadow:
-        0 30px 60px rgba(0,0,0,0.35);
-
-      border-color:
-        rgba(255,255,255,0.25);
+      transform: translateY(-8px);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.3);
     }
 
     /* IMAGE */
-
     .card img {
       width: 100%;
-      height: 250px;
-
+      height: 190px;
       object-fit: cover;
-
-      transition:
-        transform .5s ease,
-        filter .5s ease;
-    }
-
-    .card:hover img {
-      transform: scale(1.08);
-      filter: brightness(1.05);
     }
 
     /* BADGE */
-
     .badge {
       position: absolute;
-
-      top: 12px;
-      left: 12px;
-
+      top: 10px;
+      left: 10px;
       background: rgba(255,255,255,0.95);
       color: #b4334c;
-
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 800;
-
-      padding: 6px 10px;
-
+      padding: 5px 8px;
       border-radius: 8px;
-
-      z-index: 2;
-
-      box-shadow:
-        0 8px 20px rgba(0,0,0,0.2);
     }
 
     /* CONTENT */
-
     .content {
-      padding: 16px;
-
+      padding: 12px;
       display: flex;
       flex-direction: column;
-
       flex: 1;
     }
 
     .title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
-
-      margin-bottom: 10px;
-
-      line-height: 1.3;
+      margin-bottom: 6px;
+      line-height: 1.2;
     }
 
     .info {
-      font-size: 13.5px;
-      margin-bottom: 8px;
-      opacity: 0.92;
+      font-size: 12.5px;
+      margin-bottom: 5px;
+      opacity: 0.9;
     }
 
-    /* BUTTON */
-
+    /* BUTTON (NO CUORI) */
     .btn {
-
       margin-top: auto;
-
-      padding: 13px;
-
-      background:
-        linear-gradient(
-          135deg,
-          #fffaf6,
-          #f2e6e6
-        );
-
+      padding: 11px;
+      background: linear-gradient(135deg, #fffaf6, #f2e6e6);
       color: #b4334c;
-
       text-align: center;
-
       font-weight: 800;
-
       border-radius: 12px;
-
       text-decoration: none;
-
-      transition:
-        transform .2s ease,
-        filter .2s ease;
     }
 
-    .btn:hover {
-      transform: scale(1.02);
-      filter: brightness(1.04);
-    }
-
+    /* EMPTY */
     .empty {
       text-align: center;
       padding: 50px;
       font-size: 18px;
       opacity: 0.9;
+    }
+
+    /* STICKY BAR */
+    .sticky-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(20,20,20,0.88);
+      backdrop-filter: blur(10px);
+      padding: 10px 14px;
+      display: flex;
+      justify-content: center;
+      border-top: 1px solid rgba(255,255,255,0.15);
+      z-index: 999;
+    }
+
+    .sticky-inner {
+      background: linear-gradient(135deg, #ffcc00, #ff7a00);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-weight: 900;
+      color: #111;
+      font-size: 14px;
     }
 
   </style>
@@ -274,25 +217,16 @@
 <body>
 
 <header>
-
   <img class="logo" src="./logoBR.png"/>
-
   <h1>Bachata Roma</h1>
-
-  <div class="subtitle">
-        I migliori eventi del mondo a portata di click 🔥 
-
-  </div>
-
+  <div class="subtitle">I migliori eventi del mondo 🔥</div>
 </header>
 
 <!-- FILTERS -->
-
 <div class="filters">
 
   <div class="filter-group">
     <div class="filter-label">🌍 Continente</div>
-
     <select id="continentFilter">
       <option value="all">Ovunque</option>
     </select>
@@ -300,7 +234,6 @@
 
   <div class="filter-group">
     <div class="filter-label">📍 Paese</div>
-
     <select id="countryFilter">
       <option value="all">Tutti i paesi</option>
     </select>
@@ -308,7 +241,6 @@
 
   <div class="filter-group">
     <div class="filter-label">📅 Quando</div>
-
     <select id="monthFilter">
       <option value="all">Tutti i mesi</option>
     </select>
@@ -316,358 +248,170 @@
 
 </div>
 
-<!-- EVENTS -->
-
 <div id="events" class="container"></div>
+
+<div class="sticky-bar">
+  <div class="sticky-inner">🔥 Explore events</div>
+</div>
 
 <script>
 
-const BASE =
-  "https://api.codetabs.com/v1/proxy?quest=";
-
-const API =
-  "https://www.goandance.com/api/affiliates/6b69b3cc-49a3-445e-b6cb-8121d472c0c7/events";
+const BASE = "https://api.codetabs.com/v1/proxy?quest=";
+const API = "https://www.goandance.com/api/affiliates/6b69b3cc-49a3-445e-b6cb-8121d472c0c7/events";
 
 let eventsData = [];
 
 const countryNames =
   new Intl.DisplayNames(['it'], { type: 'region' });
 
-/* CONTINENTS */
-
 const continentMap = {
-
-  "Europa": new Set([
-    "IT","ES","FR","DE","NL","PT","BE","CH","AT","GR","PL",
-    "RO","HU","CZ","SE","NO","DK","FI","IE","BG","HR","RS",
-    "UA","TR"
-  ]),
-
-  "America": new Set([
-    "US","CA","MX","BR","AR","CO","CL","PE","VE","DO",
-    "CR","PA","UY","EC","GT","HN"
-  ]),
-
-  "Asia": new Set([
-    "JP","CN","KR","TH","VN","ID","IN","PH","MY","SG",
-    "SA","AE","IL","PK","BD"
-  ]),
-
-  "Africa": new Set([
-    "ZA","EG","MA","TN","DZ","NG","KE","GH","ET","UG","TZ"
-  ]),
-
-  "Oceania": new Set([
-    "AU","NZ"
-  ])
+  "Europa": new Set(["IT","ES","FR","DE","NL","PT","BE","CH","AT","GR","PL","RO","HU","CZ","SE","NO","DK","FI","IE","BG","HR","RS","UA","TR"]),
+  "America": new Set(["US","CA","MX","BR","AR","CO","CL","PE","VE","DO","CR","PA","UY","EC","GT","HN"]),
+  "Asia": new Set(["JP","CN","KR","TH","VN","ID","IN","PH","MY","SG","SA","AE","IL","PK","BD"]),
+  "Africa": new Set(["ZA","EG","MA","TN","DZ","NG","KE","GH","ET","UG","TZ"]),
+  "Oceania": new Set(["AU","NZ"])
 };
 
 /* FETCH */
-
 async function fetchAll(url, acc = []) {
-
-  const res =
-    await fetch(BASE + encodeURIComponent(url));
-
-  const json =
-    await res.json();
-
+  const res = await fetch(BASE + encodeURIComponent(url));
+  const json = await res.json();
   acc.push(...(json.data || []));
-
-  if (json.meta?.nextUrl) {
-    return fetchAll(json.meta.nextUrl, acc);
-  }
-
+  if (json.meta?.nextUrl) return fetchAll(json.meta.nextUrl, acc);
   return acc;
 }
 
 /* CONTINENT */
-
 function getContinent(code) {
-
-  for (const [continent, set] of Object.entries(continentMap)) {
-
-    if (set.has(code)) {
-      return continent;
-    }
+  for (const [c,set] of Object.entries(continentMap)) {
+    if (set.has(code)) return c;
   }
-
   return "Europa";
 }
 
-/* CONTINENTS */
-
-function populateContinents(events) {
-
-  const sel =
-    document.getElementById("continentFilter");
-
-  sel.innerHTML =
-    `<option value="all">Ovunque</option>`;
-
-  const used =
-    [...new Set(events.map(
-      e => e.address?.country?.code
-    ))].filter(Boolean);
-
-  const continents =
-    [...new Set(used.map(getContinent))];
-
-  continents.forEach(c => {
-
-    const opt =
-      document.createElement("option");
-
-    opt.value = c;
-    opt.textContent = c;
-
-    sel.appendChild(opt);
-  });
-}
-
-/* COUNTRIES */
-
-function populateCountries(continent, events) {
-
-  const sel =
-    document.getElementById("countryFilter");
-
-  sel.innerHTML =
-    `<option value="all">Tutti i paesi</option>`;
-
-  let list =
-    [...new Set(events.map(
-      e => e.address?.country?.code
-    ))].filter(Boolean);
-
-  if (continent !== "all") {
-
-    list =
-      list.filter(
-        c => getContinent(c) === continent
-      );
-  }
-
-  list.sort((a,b)=>
-
-    (countryNames.of(a)||a)
-      .localeCompare(
-        countryNames.of(b)||b,
-        "it",
-        { sensitivity:"base" }
-      )
-  );
-
-  list.forEach(c => {
-
-    const opt =
-      document.createElement("option");
-
-    opt.value = c;
-    opt.textContent =
-      countryNames.of(c) || c;
-
-    sel.appendChild(opt);
-  });
-}
-
-/* MONTHS */
-
-function populateMonths() {
-
-  const sel =
-    document.getElementById("monthFilter");
-
-  const now =
-    new Date();
-
-  for (let i=0;i<12;i++) {
-
-    const d =
-      new Date(
-        now.getFullYear(),
-        now.getMonth()+i,
-        1
-      );
-
-    const val =
-      `${d.getFullYear()}-${String(
-        d.getMonth()+1
-      ).padStart(2,"0")}`;
-
-    const opt =
-      document.createElement("option");
-
-    opt.value = val;
-
-    opt.textContent =
-      d.toLocaleDateString(
-        "it-IT",
-        {
-          month:"long",
-          year:"numeric"
-        }
-      );
-
-    sel.appendChild(opt);
-  }
-}
-
-/* BADGE */
-
+/* BADGE (ORIGINALE) */
 function getBadge(e) {
-
   const days =
-    Math.round(
-      (
-        new Date(e.dateTo)
-        -
-        new Date(e.dateFrom)
-      ) / 86400000
-    ) + 1;
+    Math.round((new Date(e.dateTo) - new Date(e.dateFrom)) / 86400000) + 1;
 
-  if (days === 1) {
-    return "📅 1 giorno";
-  }
-
-  if (days <= 3) {
-    return "⚡ Weekend";
-  }
-
-  if (days <= 5) {
-    return `🎉 ${days} giorni`;
-  }
-
+  if (days === 1) return "📅 1 giorno";
+  if (days <= 3) return "⚡ Weekend";
+  if (days <= 5) return `🎉 ${days} giorni`;
   return `💎 ${days} giorni evento`;
 }
 
 /* FILTER */
-
 function filterEvents(events) {
-
-  const continent =
-    document.getElementById("continentFilter").value;
-
-  const country =
-    document.getElementById("countryFilter").value;
-
-  const month =
-    document.getElementById("monthFilter").value;
+  const continent = continentFilter.value;
+  const country = countryFilter.value;
+  const month = monthFilter.value;
 
   return events.filter(e => {
+    const d = new Date(e.dateFrom);
+    const code = e.address?.country?.code;
 
-    const d =
-      new Date(e.dateFrom);
-
-    const code =
-      e.address?.country?.code;
-
-    if (
-      continent !== "all"
-      &&
-      getContinent(code) !== continent
-    ) return false;
-
-    if (
-      country !== "all"
-      &&
-      code !== country
-    ) return false;
+    if (continent !== "all" && getContinent(code) !== continent) return false;
+    if (country !== "all" && code !== country) return false;
 
     if (month !== "all") {
-
-      const m =
-        `${d.getFullYear()}-${String(
-          d.getMonth()+1
-        ).padStart(2,"0")}`;
-
-      if (m !== month) {
-        return false;
-      }
+      const m = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+      if (m !== month) return false;
     }
 
     return true;
   });
 }
 
+/* POPULATE CONTINENTS */
+function populateContinents(events) {
+  const sel = document.getElementById("continentFilter");
+
+  const used = [...new Set(events.map(e => e.address?.country?.code))].filter(Boolean);
+  const continents = [...new Set(used.map(getContinent))];
+
+  continents.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    sel.appendChild(opt);
+  });
+}
+
+/* POPULATE COUNTRIES */
+function populateCountries(continent, events) {
+  const sel = document.getElementById("countryFilter");
+
+  sel.innerHTML = `<option value="all">Tutti i paesi</option>`;
+
+  let list = [...new Set(events.map(e => e.address?.country?.code))].filter(Boolean);
+
+  if (continent !== "all") {
+    list = list.filter(c => getContinent(c) === continent);
+  }
+
+  list.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = countryNames.of(c) || c;
+    sel.appendChild(opt);
+  });
+}
+
+/* POPULATE MONTHS */
+function populateMonths() {
+  const sel = document.getElementById("monthFilter");
+
+  const now = new Date();
+
+  for (let i=0;i<12;i++) {
+    const d = new Date(now.getFullYear(), now.getMonth()+i, 1);
+
+    const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+
+    const opt = document.createElement("option");
+    opt.value = val;
+    opt.textContent = d.toLocaleDateString("it-IT", { month:"long", year:"numeric" });
+
+    sel.appendChild(opt);
+  }
+}
+
 /* RENDER */
-
 function render(events) {
-
-  const c =
-    document.getElementById("events");
-
+  const c = document.getElementById("events");
   c.innerHTML = "";
 
   if (!events.length) {
-
-    c.innerHTML =
-      `<div class="empty">
-        Nessun evento trovato
-      </div>`;
-
+    c.innerHTML = `<div class="empty">Nessun evento trovato</div>`;
     return;
   }
 
   events.forEach(e => {
 
-    const url =
-      e.url?.it || e.url?.en;
+    const url = e.url?.it || e.url?.en;
 
-    const start =
-      new Date(e.dateFrom)
-        .toLocaleDateString("it-IT");
+    const start = new Date(e.dateFrom).toLocaleDateString("it-IT");
+    const end = new Date(e.dateTo).toLocaleDateString("it-IT");
 
-    const end =
-      new Date(e.dateTo)
-        .toLocaleDateString("it-IT");
-
-    const location =
-      [
-        e.address?.name,
-        e.address?.locality
-      ]
-      .filter(Boolean)
-      .join(" - ");
-
-    const card =
-      document.createElement("div");
-
+    const card = document.createElement("div");
     card.className = "card";
 
     card.innerHTML = `
+      <div class="badge">${getBadge(e)}</div>
 
-      <div class="badge">
-        ${getBadge(e)}
-      </div>
-
-      <a href="${url}" target="_blank">
-
-        <img src="${e.image?.previewUrl || ''}" />
-
-      </a>
+      <img src="${e.image?.previewUrl || ''}" />
 
       <div class="content">
 
-        <div class="title">
-          ${e.name?.it || e.name?.en || "Evento"}
-        </div>
+        <div class="title">${e.name?.it || e.name?.en || "Evento"}</div>
 
-        <div class="info">
-          📍 ${location}
-        </div>
+        <div class="info">📍 ${e.address?.locality || ""}</div>
 
-        <div class="info">
-          📅 ${start} → ${end}
-        </div>
+        <div class="info">📅 ${start} → ${end}</div>
 
-        <div class="info">
-          👤 ${e.organizer || ""}
-        </div>
+        <div class="info">👤 ${e.organizer || ""}</div>
 
-        <a class="btn" href="${url}" target="_blank">
-          Scopri evento
-        </a>
+        <a class="btn" href="${url}" target="_blank">Scopri evento</a>
 
       </div>
     `;
@@ -676,56 +420,26 @@ function render(events) {
   });
 }
 
-/* INIT */
-
+/* INIT FIXED */
 async function init() {
 
-  eventsData =
-    await fetchAll(API);
+  eventsData = await fetchAll(API);
 
   populateContinents(eventsData);
-
-  populateCountries(
-    "all",
-    eventsData
-  );
-
+  populateCountries("all", eventsData);
   populateMonths();
 
   render(eventsData);
 }
 
 /* EVENTS */
-
-document
-  .getElementById("continentFilter")
-  .onchange = (e) => {
-
-    populateCountries(
-      e.target.value,
-      eventsData
-    );
-
-    render(
-      filterEvents(eventsData)
-    );
+continentFilter.onchange = (e) => {
+  populateCountries(e.target.value, eventsData);
+  render(filterEvents(eventsData));
 };
 
-document
-  .getElementById("countryFilter")
-  .onchange = () =>
-
-    render(
-      filterEvents(eventsData)
-    );
-
-document
-  .getElementById("monthFilter")
-  .onchange = () =>
-
-    render(
-      filterEvents(eventsData)
-    );
+countryFilter.onchange = () => render(filterEvents(eventsData));
+monthFilter.onchange = () => render(filterEvents(eventsData));
 
 init();
 
