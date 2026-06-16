@@ -182,7 +182,7 @@
 
 <header>
   <img class="logo" src="./logoBR.png"/>
-  <h1>Bachata Roma Radar 4</h1>
+  <h1>Bachata Roma Radar 5</h1>
   <div class="subtitle">I migliori eventi di bachata nel mondo, in tempo reale 🔥</div>  <br>
   <div class="subtitle" style="font-size: 14px;">+10.000 ballerini già lo usano</div>
 </header>
@@ -233,31 +233,38 @@ const continentMap = {
 };
 
 async function fetchAll(url, acc = []) {
-  console.log("Fetching:", url);
+  try {
+    if (!url) return acc;
 
-  const res = await fetch(url);
+    const res = await fetch(url);
 
-  if (!res.ok) {
-    const text = await res.text();
-    console.error("HTTP ERROR:", res.status, text);
-    return acc;
-  }
+    if (!res.ok) {
+      console.error("HTTP ERROR:", res.status);
+      return acc;
+    }
 
-  const json = await res.json();
+    const json = await res.json();
 
-  acc.push(...(json.data || []));
+    acc.push(...(json.data || []));
 
-  if (json.meta?.nextUrl) {
-    const next = json.meta.nextUrl.startsWith("http")
-      ? json.meta.nextUrl
-      : "https://www.goandance.com" + json.meta.nextUrl;
+  const next = json.meta?.nextUrl;
 
-    return fetchAll(next, acc);
-  }
+	// 🔥 FORZA SOLO STESSO DOMINIO (Vercel proxy)
+	if (next && next.includes("/api/events")) {
+  const fullNext = next.startsWith("http")
+    ? next
+    : "https://events-api-1dva.vercel.app" + next;
 
-  return acc;
+  return fetchAll(fullNext, acc);
 }
 
+    return acc;
+
+  } catch (err) {
+    console.error("FETCH FAILED:", url, err);
+    return acc;
+  }
+}
 function getContinent(code) {
   for (const [c,set] of Object.entries(continentMap)) {
     if (set.has(code)) return c;
