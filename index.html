@@ -216,7 +216,6 @@
 
 <script>
 
-const BASE = "https://api.codetabs.com/v1/proxy?quest=";
 const API = "https://www.goandance.com/api/affiliates/6b69b3cc-49a3-445e-b6cb-8121d472c0c7/events";
 
 let eventsData = [];
@@ -233,26 +232,26 @@ const continentMap = {
 };
 
 async function fetchAll(url, acc = []) {
-  const res = await fetch(BASE + encodeURIComponent(url));
-  const json = await res.json();
-  acc.push(...(json.data || []));
-  if (json.meta?.nextUrl) return fetchAll(json.meta.nextUrl, acc);
-  return acc;
-}
-
-async function fetchAll(url, acc = []) {
   console.log("Fetching:", url);
 
-  const res = await fetch(BASE + encodeURIComponent(url));
-  const json = await res.json();
+  const res = await fetch(url);
 
-  console.log(json);
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("HTTP ERROR:", res.status, text);
+    return acc;
+  }
+
+  const json = await res.json();
 
   acc.push(...(json.data || []));
 
   if (json.meta?.nextUrl) {
-    console.log("Next URL:", json.meta.nextUrl);
-    return fetchAll(json.meta.nextUrl, acc);
+    const next = json.meta.nextUrl.startsWith("http")
+      ? json.meta.nextUrl
+      : "https://www.goandance.com" + json.meta.nextUrl;
+
+    return fetchAll(next, acc);
   }
 
   return acc;
