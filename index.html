@@ -247,7 +247,9 @@ async function fetchAll(url, acc = []) {
 
   acc.push(...(json.data || []));
 
-  const next = json.meta?.nextUrl;
+ const fullNext = next.startsWith("http")
+  ? `${API}?proxied=${encodeURIComponent(next)}`
+  : new URL(next, API).href;
 
   if (next) {
     const fullNext = next.startsWith("http")
