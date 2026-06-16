@@ -215,8 +215,6 @@
 <div id="events" class="container"></div>
 
 <script>
-
-
 const API = "https://events-api-1dva.vercel.app/api/events";
 
 let eventsData = [];
@@ -232,12 +230,7 @@ const continentMap = {
   "Oceania": new Set(["AU","NZ"])
 };
 
-
-
-
-
-
-
+// 🔥 SEMPRE SEMPLICE: backend fa tutto
 async function fetchAll(url) {
   const res = await fetch(url);
 
@@ -247,32 +240,26 @@ async function fetchAll(url) {
   }
 
   const json = await res.json();
-
   return json.data || [];
 }
 
-
-
-
-
 function getContinent(code) {
-  for (const [c,set] of Object.entries(continentMap)) {
+  for (const [c, set] of Object.entries(continentMap)) {
     if (set.has(code)) return c;
   }
   return "Europa";
 }
 
-/* CONTINENTI ORDINATI (EUROPA PRIMA) */
 function populateContinents(events) {
   const sel = document.getElementById("continentFilter");
 
   const used = [...new Set(events.map(e => e.address?.country?.code))].filter(Boolean);
   let continents = [...new Set(used.map(getContinent))];
 
-  continents = continents.sort((a,b) => {
+  continents.sort((a,b) => {
     if (a === "Europa") return -1;
     if (b === "Europa") return 1;
-    return a.localeCompare(b, "it", { sensitivity:"base" });
+    return a.localeCompare(b, "it", { sensitivity: "base" });
   });
 
   continents.forEach(c => {
@@ -283,10 +270,8 @@ function populateContinents(events) {
   });
 }
 
-/* PAESI ORDINATI */
 function populateCountries(continent, events) {
   const sel = document.getElementById("countryFilter");
-
   sel.innerHTML = `<option value="all">Tutti i paesi</option>`;
 
   let list = [...new Set(events.map(e => e.address?.country?.code))].filter(Boolean);
@@ -307,7 +292,6 @@ function populateCountries(continent, events) {
   });
 }
 
-/* MONTHS */
 function populateMonths() {
   const sel = document.getElementById("monthFilter");
   const now = new Date();
@@ -406,7 +390,6 @@ countryFilter.onchange = () => render(filterEvents(eventsData));
 monthFilter.onchange = () => render(filterEvents(eventsData));
 
 init();
-
 </script>
 
 </body>
