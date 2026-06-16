@@ -234,34 +234,22 @@ const continentMap = {
 
 
 
-async function fetchAll(url, acc = []) {
-  console.log("CALL:", url);
 
+
+
+
+async function fetchAll(url) {
   const res = await fetch(url);
-  console.log("STATUS:", res.status);
+
+  if (!res.ok) {
+    console.error("HTTP ERROR:", res.status);
+    return [];
+  }
 
   const json = await res.json();
 
-  console.log("PAGE EVENTS:", json.data?.length);
-  console.log("HAS NEXT:", json.meta?.nextUrl);
-
-  acc.push(...(json.data || []));
-
- const fullNext = next.startsWith("http")
-  ? `${API}?proxied=${encodeURIComponent(next)}`
-  : new URL(next, API).href;
-
-  if (next) {
-    const fullNext = next.startsWith("http")
-      ? next
-      : new URL(next, API).href;
-
-    return fetchAll(fullNext, acc);
-  }
-
-  return acc;
+  return json.data || [];
 }
-
 
 
 
