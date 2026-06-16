@@ -232,11 +232,23 @@ const continentMap = {
   "Oceania": new Set(["AU","NZ"])
 };
 
+
+
 async function fetchAll(url, acc = []) {
+  console.log("Fetching:", url);
+
   const res = await fetch(BASE + encodeURIComponent(url));
   const json = await res.json();
+
+  console.log(json);
+
   acc.push(...(json.data || []));
-  if (json.meta?.nextUrl) return fetchAll(json.meta.nextUrl, acc);
+
+  if (json.meta?.nextUrl) {
+    console.log("Next URL:", json.meta.nextUrl);
+    return fetchAll(json.meta.nextUrl, acc);
+  }
+
   return acc;
 }
 
