@@ -232,41 +232,39 @@ const continentMap = {
   "Oceania": new Set(["AU","NZ"])
 };
 
+
+
 async function fetchAll(url, acc = []) {
-  try {
-    if (!url) return acc;
+  console.log("CALL:", url);
 
-    const res = await fetch(url);
+  const res = await fetch(url);
+  console.log("STATUS:", res.status);
 
-    if (!res.ok) {
-      console.error("HTTP ERROR:", res.status);
-      return acc;
-    }
+  const json = await res.json();
 
-    const json = await res.json();
+  console.log("PAGE EVENTS:", json.data?.length);
+  console.log("HAS NEXT:", json.meta?.nextUrl);
 
-    acc.push(...(json.data || []));
+  acc.push(...(json.data || []));
 
+  const next = json.meta?.nextUrl;
 
+  if (next) {
+    const fullNext = next.startsWith("http")
+      ? next
+      : new URL(next, API).href;
 
-
-const next = json.meta?.nextUrl;
-
-if (next) {
-  const fullNext = next.startsWith("http")
-    ? next
-    : new URL(next, API).href;
-
-  return fetchAll(fullNext, acc);
-}
-
-    return acc;
-
-  } catch (err) {
-    console.error("FETCH FAILED:", url, err);
-    return acc;
+    return fetchAll(fullNext, acc);
   }
+
+  return acc;
 }
+
+
+
+
+
+
 function getContinent(code) {
   for (const [c,set] of Object.entries(continentMap)) {
     if (set.has(code)) return c;
